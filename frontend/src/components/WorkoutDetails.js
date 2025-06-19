@@ -1,17 +1,16 @@
 import { useWorkoutsContext } from '../hooks/useWorkoutsContext'
 import { useAuthContext } from '../hooks/useAuthContext'
-
-// date fns
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+
+// Recharts
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 const WorkoutDetails = ({ workout }) => {
   const { dispatch } = useWorkoutsContext()
   const { user } = useAuthContext()
 
   const handleClick = async () => {
-    if (!user) {
-      return
-    }
+    if (!user) return
 
     const response = await fetch('/api/workouts/' + workout._id, {
       method: 'DELETE',
@@ -22,9 +21,15 @@ const WorkoutDetails = ({ workout }) => {
     const json = await response.json()
 
     if (response.ok) {
-      dispatch({type: 'DELETE_WORKOUT', payload: json})
+      dispatch({ type: 'DELETE_WORKOUT', payload: json })
     }
   }
+
+  // Chart Data
+  const chartData = [
+    { name: 'Load (kg)', value: workout.load },
+    { name: 'Reps', value: workout.reps }
+  ]
 
   return (
     <div className="workout-details">
@@ -38,6 +43,7 @@ const WorkoutDetails = ({ workout }) => {
           </svg>
         </button>
       </div>
+
       <div className="workout-stats">
         <div className="stat">
           <span className="stat-label">Load</span>
@@ -48,6 +54,19 @@ const WorkoutDetails = ({ workout }) => {
           <span className="stat-value">{workout.reps}</span>
         </div>
       </div>
+
+      {/* Chart */}
+      <div style={{ width: '100%', height: 150, marginTop: '10px' }}>
+        <ResponsiveContainer>
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" />
+            <YAxis allowDecimals={false} />
+            <Tooltip />
+            <Bar dataKey="value" fill="#4f46e5" radius={[8, 8, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="workout-footer">
         <span className="timestamp">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
